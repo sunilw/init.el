@@ -1,14 +1,133 @@
-;; prevent fucking annoying "really really close buffer?" bullshit from emacs
+;; prevent annoying "really really close buffer?" bullshit from emacs
 (remove-hook 'kill-buffer-query-functions 'server-kill-buffer-query-function)
 
 (add-to-list 'load-path "~/.emacs.d/lisp")
 
+;;;;;;;;;;;;;;;
+;; color theme
+;;;;;;;;;;;;;;;
+
+(add-to-list 'load-path "~/.emacs.d/lisp/color-theme-6.6.0")
+(require 'color-theme)
+(load-file 
+ "~/.emacs.d/lisp/color-theme-6.6.0/themes/color-theme-wombat/color-theme-wombat.el")
+
+;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;
+
+(require 'popup)
+
+;; global auto revert
+(global-auto-revert-mode 1)
+
+;; helm!
+(add-to-list 'load-path "~/.emacs.d/lisp/helm")
+(require 'helm-config)
+(global-set-key (kbd "C-<tab>") 'helm-mini)
+
+
+;;;;;;;;;;;;;;;;;;;;;;;
+;;  auto-complete
+;;;;;;;;;;;;;;;;;;;;;;;
+
+(add-to-list 'load-path "~/.emacs.d/lisp/auto-complete")
+(require 'auto-complete-config)
+(add-to-list 'ac-dictionary-directories "~/.emacs.d/lisp/auto-complete/dict")
+(ac-config-default)
+
+(add-to-list 'ac-modes 'coffee-mode)
+(add-to-list 'ac-modes 'js-mode)
+(add-to-list 'ac-modes 'python-mode)
+(add-to-list 'ac-modes 'shell-mode)
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; django/python stuff
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(add-to-list 'load-path "~/.emacs.d/lisp/python-django.el")
+(require 'python-django)
+
+(add-to-list 'load-path "~/.emacs.d/lisp/pony-mode/src")
+(require 'pony-mode)
+
+
+(setq
+ python-shell-interpreter "ipython"
+ python-shell-interpreter-args ""
+ python-shell-prompt-regexp "In \\[[0-9]+\\]: "
+ python-shell-prompt-output-regexp "Out\\[[0-9]+\\]: "
+ python-shell-completion-setup-code
+ "from IPython.core.completerlib import module_completion"
+ python-shell-completion-module-string-code
+ "';'.join(module_completion('''%s'''))\n"
+ python-shell-completion-string-code
+ "';'.join(get_ipython().Completer.all_completions('''%s'''))\n")
+
+(autoload 'python-shell-switch-to-shell "python" nil t)
+
+
+;; connect to pyflakes
+(when (load "flymake" t)
+  (defun flymake-pyflakes-init ()
+    (let* ((temp-file (flymake-init-create-temp-buffer-copy
+                       'flymake-create-temp-inplace))
+           (local-file (file-relative-name
+                        temp-file
+                        (file-name-directory buffer-file-name))))
+      (list "pyflakes" (list local-file))))
+
+  (add-to-list 'flymake-allowed-file-name-masks
+               '("\\.py\\'" flymake-pyflakes-init)))
+
+(add-hook 'find-file-hook 'flymake-find-file-hook)
+
+;; get tab completions?
+(eval-after-load "python"
+  '(define-key inferior-python-mode-map "\t" 'python-shell-completion-complete-or-indent))
+
+
+(add-to-list 'load-path "~/.emacs.d/lisp/emacs-helm-pydoc")
+(require 'helm-pydoc)
+(eval-after-load "python"
+  '(progn
+     (define-key python-mode-map (kbd "C-c C-d") 'helm-pydoc)))
+
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; jedi
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(add-to-list 'load-path "~/.emacs.d/lisp/emacs-ctable")
+(require 'ctable)
+
+(add-to-list 'load-path "~/.emacs.d/lisp/emacs-deferred")
+(require 'deferred)
+
+(add-to-list 'load-path "~/.emacs.d/lisp/emacs-epc")
+(require 'epc)
+
+(add-to-list 'load-path "~/.emacs.d/lisp/emacs-jedi")
+(add-hook 'python-mode-hook 'jedi:setup)
+(require 'jedi)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; http://www.emacswiki.org/emacs/BackupDirectory
 ;; move autosave files out of the present working directory
- (setq backup-directory-alist
-          `((".*" . ,temporary-file-directory)))
-    (setq auto-save-file-name-transforms
-          `((".*" ,temporary-file-directory t)))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(setq
+ backup-by-copying t      ; don't clobber symlinks
+ backup-directory-alist
+ '(("." . "~/.saves"))    ; don't litter my fs tree
+ delete-old-versions t
+ kept-new-versions 6
+ kept-old-versions 2
+ version-control t)       ; use versioned backups
+
 
 (message "Deleting old backup files...")
 (let ((week (* 60 60 24 7))
@@ -29,6 +148,11 @@
                    (let ((matching (matching-paren delimiter)))
                      (and matching (char-syntax matching)))))))
 
+;; workgroups
+(add-to-list 'load-path "~/.emacs.d/lisp/workgroups.el")
+(require 'workgroups)
+(setq wg-prefix-key (kbd "C-c w"))
+
 ;; rainbows!
 (require 'rainbow-delimiters)
 (add-hook 'prog-mode-hook 'rainbow-delimiters-mode)
@@ -41,14 +165,14 @@
 (add-to-list 'load-path "~/.emacs.d/lisp/jss")
 (require 'jss)
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; yasnippet
-(add-to-list 'load-path
-             "~/.emacs.d/lisp/yasnippet")
-
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(add-to-list 'load-path "~/.emacs.d/lisp/yasnippet")
 (require 'yasnippet)
 (yas/load-directory "~/.emacs.d/lisp/yasnippet/snippets")
-(yas--initialize)
-(yas/global-mode 1)
+;;(yas--initialize)
+(yas-reload-all)
 
 ;;fix broken yas behaviour
 (defun yas/advise-indent-function (function-symbol)
@@ -67,14 +191,11 @@
 ;; get rid of annoying tilde files
 (setq make-backup-files nil)
 
-;; auto-complete
-(add-to-list 'load-path "~/.emacs.d/lisp/auto-complete")
-(require 'auto-complete-config)
-(add-to-list 'ac-dictionary-directories "~/.emacs.d/lisp/auto-complete/dict")
-(ac-config-default)
+;; set up yas in modes
+(add-hook 'shell-mode-hook 'yas-minor-mode)
+(add-hook 'python-mode-hook 'yas-minor-mode)
 
-(add-to-list 'ac-modes 'coffee-mode)
-(add-to-list 'ac-modes 'js-mode)
+
 
 
 ;; http://emacsblog.org/2007/01/17/indent-whole-buffer/
@@ -123,7 +244,7 @@
              "~/.emacs.d/lisp/php-mode-1.5.0")
 (require 'php-mode)
 (add-hook 'php-mode-hook 'imenu-add-menubar-index)
-
+(add-hook 'php-mode-hook 'auto-indent-mode)
 
 ;; imenu+
 (require 'hide-comnt)
@@ -175,6 +296,9 @@
 (setq cssm-mirror-mode nil)
 ;; while we are here...
 (add-hook 'css-mode-hook 'smartparens-mode)
+(add-hook 'css-mode-hook 'yas-minor-mode)
+
+
 
 ;; increase text size
 (global-set-key
@@ -193,11 +317,16 @@
    (interactive)
    (set-face-attribute 'default nil :height 240)))
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
 ;; js2 mode!
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (autoload 'js2-mode "js2-mode" nil t)
 (add-to-list 'auto-mode-alist '("\\.js$" . js2-mode))
 (add-to-list 'auto-mode-alist '(".bowerrc" . js2-mode))
-
+(add-hook 'js2-mode-hook 'yas-minor-mode)
 
 ;; js2 enhancements
 
@@ -238,9 +367,41 @@
 (require 'jquery-doc)
 (add-hook 'js2-mode-hook 'jquery-doc-setup)
 
-(require 'popup)
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; 
+;; skewer dep: simple-httpd
+;; 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+(add-to-list 'load-path "~/.emacs.d/lisp/emacs-web-server")
+(require 'simple-httpd)
+(setq httpd-root "/var/www")
+(httpd-start)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; 
+;; skewer
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(add-to-list 'load-path "~/.emacs.d/lisp/skewer-mode")
+(require 'skewer-mode)
+
+(add-hook 'web-mode-hook 'skewer-mode)
+(add-hook 'js2-mode-hook 'skewer-mode)
+(add-hook 'css-mode-hook 'skewer-css-mode)
+(add-hook 'sass-mode-hook 'skewer-css-mode)
+(add-hook 'html-mode-hook 'skewer-html-mode)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; 
 ;; auto-complete
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (add-to-list 'load-path "~/.emacs.d/lisp/auto-complete")
 (require 'auto-complete-config)
 (add-to-list 'ac-dictionary-directories "~/.emacs.d/lisp/auto-complete/dict")
@@ -257,8 +418,9 @@
 ;; Rinari
 ;; (add-to-list 'load-path "~/.emacs.d/lisp/rinari")
 ;; (require 'rinari)
-;; (add-hook 'html-mode-hook 'yas-minor-mode)
-;; (add-hook 'html-mode-hook 'linum-mode)
+
+(add-hook 'html-mode-hook 'yas-minor-mode)
+(add-hook 'html-mode-hook 'linum-mode)
 
 ;; mustache-mode
 (require 'mustache-mode)
@@ -277,9 +439,6 @@
 (add-to-list 'load-path "~/.emacs.d/lisp/coffee-mode")
 (require 'coffee-mode)
 
-(add-to-list 'load-path "~/.emacs.d/lisp/wrap-region")
-(require 'wrap-region)
-(add-hook 'nxml-mode-hook 'wrap-region-mode)
 
 ;; web mode
 (add-to-list 'load-path "~/.emacs.d/lisp/web-mode")
@@ -295,7 +454,9 @@
 (add-hook 'web-mode-hook 'linum-mode 1)
 (add-hook 'web-mode-hook 'autopair-mode)
 (add-hook 'web-mode-hook 'wrap-region-mode)
-(add-hook 'web-mode-hook 'smartparens-mode)
+(add-hook 'web-mode-hook 'linum-mode)
+(add-hook 'web-mode-hook 'yas-minor-mode)
+(add-hook 'web-mode-hook 'electric-pair-mode)
 
 (defun web-mode-init ()
   "web-mode config."
@@ -318,10 +479,6 @@
 
 (add-hook 'php-mode-hook 'auto-complete-mode 1)
 
-;; helm!
-(add-to-list 'load-path "~/.emacs.d/lisp/helm")
-(require 'helm-config)
-(global-set-key (kbd "C-<tab>") 'helm-mini)
 
 ;; scss mode
 (add-to-list 'load-path "~/.emacs.d/lisp/scss-mode")
@@ -353,6 +510,15 @@ mentioned in an erc channel" t)
             'append 'local)) ; buffer-local
 
 
+;; php-boris
+(add-to-list 'load-path "~/.emacs.d/lisp/php-boris")
+(require 'php-boris)
+
+;; boris minor mode
+(add-to-list 'load-path "~/.emacs.d/lisp/php-boris-minor-mode")
+(require 'php-boris-minor-mode)
+
+
 ;; https://gist.github.com/nonsequitur/666092
 (define-minor-mode moz-reload-on-save-mode
   "Moz Reload On Save Minor Mode"
@@ -361,7 +527,7 @@ mentioned in an erc channel" t)
       ;; Edit hook buffer-locally.
       (add-hook 'after-save-hook 'moz-firefox-reload nil t)
     (remove-hook 'after-save-hook 'moz-firefox-reload t)))
- 
+
 (defun moz-firefox-reload ()
   (comint-send-string (inferior-moz-process) "BrowserReload();"))
 
@@ -390,11 +556,31 @@ mentioned in an erc channel" t)
         c-basic-offset 4))
 
 
+;; auto indent mode
+(add-to-list 'load-path "~/.emacs.d/lisp/auto-indent-mode.el")
+(setq auto-indent-on-visit-file t)
+(require 'auto-indent-mode)
+(require 'php-boris-minor-mode)
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;  color theme
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(set-cursor-color "white")
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;  color theme config ends
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 
 
 ;; customize mode-line
 (set-face-foreground 'mode-line "white")
 (set-face-background 'mode-line "purple")
+
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -418,5 +604,6 @@ mentioned in an erc channel" t)
  '(web-mode-html-tag-face ((t (:foreground "maroon1"))))
  '(web-mode-keyword-face ((t (:inherit font-lock-keyword-face :foreground "Green"))))
  '(web-mode-preprocessor-face ((t (:inherit font-lock-preprocessor-face :foreground "DeepSkyBlue1")))))
+
 
 (set-cursor-color "white")
