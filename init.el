@@ -3,32 +3,67 @@
 
 (add-to-list 'load-path "~/.emacs.d/lisp")
 
-;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; get lock files and autosaves out of the way
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+(setq backup-directory-alist `(("." . "~/.saves")))
+(setq backup-by-copying t)
+(setq delete-old-versions t
+      kept-new-versions 6
+      kept-old-versions 2
+      version-control t)
+
+(setq auto-save-file-name-transforms
+      `((".*" ,"~/.saves/" t)))
+
+
+(setq create-lockfiles nil)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
 ;; color theme
-;;;;;;;;;;;;;;;
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (add-to-list 'load-path "~/.emacs.d/lisp/color-theme-6.6.0")
 (require 'color-theme)
 (load-file 
  "~/.emacs.d/lisp/color-theme-6.6.0/themes/color-theme-wombat/color-theme-wombat.el")
+(add-to-list 'custom-theme-load-path 
+	     "~/.emacs.d/lisp/color-theme-6.6.0/color-theme-6.6.0/themes")
 
-;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;
+(add-to-list 'custom-theme-load-path 
+	     "~/.emacs.d/lisp/color-theme-6.6.0/color-theme-6.6.0/themes/moe-theme.el")
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (require 'popup)
 
 ;; global auto revert
 (global-auto-revert-mode 1)
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
 ;; helm!
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (add-to-list 'load-path "~/.emacs.d/lisp/helm")
 (require 'helm-config)
 (global-set-key (kbd "C-<tab>") 'helm-mini)
 
 
-;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
 ;;  auto-complete
-;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (add-to-list 'load-path "~/.emacs.d/lisp/auto-complete")
 (require 'auto-complete-config)
@@ -39,12 +74,16 @@
 (add-to-list 'ac-modes 'js-mode)
 (add-to-list 'ac-modes 'python-mode)
 (add-to-list 'ac-modes 'shell-mode)
+(add-to-list 'ac-modes 'sass-mode)
+(add-to-list 'ac-modes 'web-mode)
 
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
 ;; django/python stuff
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (add-to-list 'load-path "~/.emacs.d/lisp/python-django.el")
 (require 'python-django)
@@ -95,10 +134,26 @@
      (define-key python-mode-map (kbd "C-c C-d") 'helm-pydoc)))
 
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; 
+;; ruby things
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; Setting rbenv path
+(setenv "PATH" (concat (getenv "HOME") "/.rbenv/shims:" (getenv "HOME") "/.rbenv/bin:" (getenv "PATH")))
+(setq exec-path (cons (concat (getenv "HOME") "/.rbenv/shims") (cons (concat (getenv "HOME") "/.rbenv/bin") exec-path)))
+
+
+(add-to-list 'load-path "~/.emacs.d/lisp/inf-ruby")
+(autoload 'inf-ruby "inf-ruby" "Run an inferior Ruby process" t)
+(add-hook 'ruby-mode-hook 'inf-ruby-minor-mode)
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
 ;; jedi
+;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (add-to-list 'load-path "~/.emacs.d/lisp/emacs-ctable")
@@ -113,6 +168,14 @@
 (add-to-list 'load-path "~/.emacs.d/lisp/emacs-jedi")
 (add-hook 'python-mode-hook 'jedi:setup)
 (require 'jedi)
+
+
+;;;;;;;;;;;;;;;;;;;;;;
+;; db client
+;;;;;;;;;;;;;;;;;;;;;;
+
+(add-to-list 'load-path "~/.emacs.d/lisp/emacs-edbi")
+(require 'edbi)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; http://www.emacswiki.org/emacs/BackupDirectory
@@ -194,8 +257,9 @@
 ;; set up yas in modes
 (add-hook 'shell-mode-hook 'yas-minor-mode)
 (add-hook 'python-mode-hook 'yas-minor-mode)
-
-
+(add-hook 'sass-mode-hook 'yas-minor-mode)
+(add-hook 'css-mode-hook 'yas-minor-mode)
+(add-hook 'web-mode-hook 'yas-minor-mode)
 
 
 ;; http://emacsblog.org/2007/01/17/indent-whole-buffer/
@@ -226,7 +290,7 @@
 (require 'sass-mode)
 (add-hook 'sass-mode-hook 'linum-mode)
 (add-hook 'sass-mode-hook 'global-auto-revert-mode)
-(add-hook 'sass-mode-hook 'auto-complete-mode 1)
+(add-hook 'sass-mode-hook 'auto-complete-mode)
 
 (eval-when-compile (require 'cl))
 (defun toggle-transparency ()
@@ -444,6 +508,7 @@
 (add-to-list 'load-path "~/.emacs.d/lisp/web-mode")
 (require 'web-mode)
 (add-to-list 'auto-mode-alist '("\\.phtml\\'" . web-mode))
+(add-to-list 'auto-mode-alist '("\\.html\\'" . web-mode))
 (add-to-list 'auto-mode-alist '("\\.tpl\\.php\\'" . web-mode))
 (add-to-list 'auto-mode-alist '("\\.jsp\\'" . web-mode))
 (add-to-list 'auto-mode-alist '("\\.as[cp]x\\'" . web-mode))
@@ -488,7 +553,15 @@
 (add-hook 'scss-mode-hook 'auto-complete-mode 1)
 (add-hook 'scss-mode-hook 'smartparens-mode)
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
 ;; erc notify
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(setq erc-server-coding-system '(utf-8 . utf-8))
+
 (add-to-list 'load-path "~/.emacs.d/lisp/erc-nick-notify.el")
 (autoload 'erc-nick-notify-mode "erc-nick-notify"
   "Minor mode that calls `erc-nick-notify-cmd' when his nick gets
@@ -587,18 +660,16 @@ mentioned in an erc channel" t)
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(auto-revert-check-vc-info t)
- '(jabber-account-list (quote (("") ("sunilw@chat.facebook.com" (:password . "maddogmad00")))))
+ '(custom-safe-themes (quote ("698f6c799733e1f051f41ba2f2e0a9487178834ceb495b3c21e06fb999699779" default)))
+ '(jabber-account-list (quote (("") ("sunilw@chat.facebook.com" (:password . "[insert password here]")))))
  '(tool-bar-mode nil))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(default ((t (:stipple nil :background "black" :foreground "#7eff00" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 123 :width normal :foundry "unknown" :family "Droid Sans Mono"))))
- '(cursor ((t (:background "white"))))
- '(font-lock-comment-face ((t (:foreground "gray49" :box nil :slant italic))))
+ '(default ((t (:family "Source Sans Pro" :foundry "adobe" :slant normal :weight light :height 162 :width normal))))
  '(jabber-activity-face ((t (:background "light gray" :foreground "red" :weight bold))))
- '(mode-line-inactive ((t (:background "blue" :foreground "white"))))
  '(nil ((t (:foreground "Green"))) t)
  '(web-mode-html-attr-value-face ((t (:foreground "CornflowerBlue"))))
  '(web-mode-html-tag-face ((t (:foreground "maroon1"))))
