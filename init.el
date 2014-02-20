@@ -532,7 +532,7 @@ mentioned in an erc channel" t)
  '(auto-revert-check-vc-info t)
  '(custom-safe-themes (quote ("698f6c799733e1f051f41ba2f2e0a9487178834ceb495b3c21e06fb999699779" default)))
  '(inhibit-startup-screen t)
- '(jabber-account-list (quote (("") ("sunilw@chat.facebook.com" (:password . "maddogmad00")))))
+ '(jabber-account-list (quote (("") ("sunilw@chat.facebook.com" (:password . "***")))))
  '(tool-bar-mode nil))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
