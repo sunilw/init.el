@@ -1,28 +1,126 @@
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
-;; Some basic stuff first  
+;; Some basic stuff first
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (add-to-list 'load-path "~/.emacs.d/lisp")
 
 (savehist-mode 1)
+
 ;;(require 'recentf)
 (recentf-mode 1)
 
 (if (require 'sml-modeline nil 'noerror)    ;; use sml-modeline if available
-  (progn 
-    (sml-modeline-mode 1)                   ;; show buffer pos in the mode line
-    (scroll-bar-mode -1))                   ;; turn off the scrollbar
+    (progn
+      (sml-modeline-mode 1)                   ;; show buffer pos in the mode line
+      (scroll-bar-mode -1))                   ;; turn off the scrollbar
   (scroll-bar-mode 1)                       ;; otherwise, show a scrollbar...
-  (set-scroll-bar-mode 'right))          
+  (set-scroll-bar-mode 'right))
+
+;; editor config
+(add-to-list 'load-path "~/.emacs.d/lisp/editorconfig-emacs")
+(load "editorconfig")
+
+;; for petes sake, don't add newlines
+(setq require-final-newline nil)
+
+;; indent the buffer
+(defun iwb ()
+  "indent whole buffer"
+  (interactive)
+  (delete-trailing-whitespace)
+  (indent-region (point-min) (point-max) nil)
+  (untabify (point-min) (point-max)))
+
+(require 'xt-mouse)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;  markdown mode
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(provide 'markdown-mode)
+
+(autoload 'markdown-mode "markdown-mode"
+  "Major mode for editing Markdown files" t)
+(add-to-list 'auto-mode-alist '("\\.text\\'" . markdown-mode))
+(add-to-list 'auto-mode-alist '("\\.markdown\\'" . markdown-mode))
+(add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-mode))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;  slime
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; Setup load-path, autoloads and your lisp system
+(add-to-list 'load-path "~/.emacs.d/lisp/slime")
+(require 'slime-autoloads)
+
+(setq inferior-lisp-program "/usr/bin/sbcl")
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;  js-comint
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(require 'js-comint)
+(setq inferior-js-program-command "/usr/bin/java org.mozilla.javascript.tools.shell.Main")
+(add-hook 'js2-mode-hook '(lambda ()
+                            (local-set-key "\C-x\C-e" 'js-send-last-sexp)
+                            (local-set-key "\C-\M-x" 'js-send-last-sexp-and-go)
+                            (local-set-key "\C-cb" 'js-send-buffer)
+                            (local-set-key "\C-c\C-b" 'js-send-buffer-and-go)
+                            (local-set-key "\C-cl" 'js-load-file-and-go)
+                            ))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;  php-mode
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(add-to-list 'load-path "~/.emacs.d/lisp/php-mode")
+(require 'php-mode )
+
+(add-hook 'php-mode-hook (lambda () (subword-mode 1)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;  boris
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(require 'highlight)
+
+(add-to-list 'load-path (expand-file-name "~/.emacs.d/lisp/php-boris"))
+(require 'php-boris)
+
+(add-to-list 'load-path "~/.emacs.d/lisp/php-boris-minor-mode")
+
+(require 'php-boris-minor-mode)
+(add-hook 'php-mode-hook 'php-boris-minor-mode)
+(add-hook 'web-mode-hook 'php-boris-minor-mode)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;  node repl
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; node repl
+(require 'nodejs-repl)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;; get lock files and autosaves out of the way
 ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
 (setq backup-directory-alist `(("." . "~/.saves")))
@@ -49,11 +147,11 @@
 
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;; popup
 ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (add-to-list 'load-path "~/.emacs.d/lisp/popup-el")
 (require 'popup)
@@ -89,6 +187,11 @@
 (add-to-list 'ac-modes 'rinari-minor-mode)
 (add-to-list 'ac-modes 'rhtml-mode)
 (add-to-list 'ac-modes 'rhtml)
+(add-to-list 'ac-modes 'inf-ruby)
+(add-to-list 'ac-modes 'scss-mode)
+
+;; try and fix auto-complete mode with web mode
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -96,16 +199,28 @@
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;;
+;; Set things up for an angular snippet package that uses yas
+;; First load deps...
+;;
+
+(add-to-list 'load-path "~/.emacs.d/lisp/s.el")
+(require 's)
+
+(add-to-list 'load-path "~/.emacs.d/lisp/dash.el")
+(require 'dash)
+
 (add-to-list 'load-path "~/.emacs.d/lisp/yasnippet")
 (require 'yasnippet)
-(yas/load-directory "~/.emacs.d/lisp/yasnippet/snippets")
+(setq yas/snippet-dirs "~/.emacs.d/lisp/yasnippet/snippets")
+;;(yas/load-directory "~/.emacs.d/lisp/yasnippet/snippets")
 ;;(yas--initialize)
 (yas-reload-all)
 
 ;;fix broken yas behaviour
 (defun yas/advise-indent-function (function-symbol)
   (eval `(defadvice ,function-symbol (around yas/try-expand-first activate)
-g           ,(format
+           ,(format
              "Try to expand a snippet before point, then call `%s' as usual"
              function-symbol)
            (let ((yas/fallback-behavior nil))
@@ -116,14 +231,28 @@ g           ,(format
 ;; (yas/advise-indent-function 'css-mode-indent-line)
 (global-set-key (kbd "C-c C-r") 'sgml-tag)
 
-;; set up yas in modes
-(add-hook 'shell-mode-hook 'yas-minor-mode)
-(add-hook 'python-mode-hook 'yas-minor-mode)
-(add-hook 'sass-mode-hook 'yas-minor-mode)
-(add-hook 'css-mode-hook 'yas-minor-mode)
-(add-hook 'web-mode-hook 'yas-minor-mode)
+;;
+;;  mode support for yas
+;;
+
+(add-hook 'scss-mode-hook 'yas-minor-mode)
 (add-hook 'ruby-mode-hook 'yas-minor-mode)
+(add-hook 'rhtml-mode-hook 'yas-minor-mode)
+(add-hook 'php-mode-hook 'yas-minor-mode)
 (add-hook 'web-mode-hook 'yas-minor-mode)
+
+
+
+;; ;;
+;; ;;  angular snippets for yas
+;; ;;
+
+
+;; (add-to-list 'load-path "~/.emacs.d/lisp/angular-snippets.el")
+;; (require 'angular-snippets)
+;; (eval-after-load "sgml-mode"
+;;   '(define-key html-mode-map (kbd "C-c C-d") 'ng-snip-show-docs-at-point))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -133,10 +262,11 @@ g           ,(format
 
 (add-to-list 'load-path "~/.emacs.d/lisp/color-theme-6.6.0")
 (require 'color-theme)
-(load-file 
+(load-file
  "~/.emacs.d/lisp/color-theme-6.6.0/themes/color-theme-wombat/color-theme-wombat.el")
-(add-to-list 'custom-theme-load-path 
+(add-to-list 'custom-theme-load-path
              "~/.emacs.d/lisp/color-theme-6.6.0/color-theme-6.6.0/themes")
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -147,14 +277,39 @@ g           ,(format
 (add-to-list 'load-path "~/.emacs.d/lisp/emmet-mode")
 (require 'emmet-mode)
 
+(add-hook 'web-mode-hook 'emmet-mode)
+(add-hook 'rhtml-mode-hook 'emmet-mode)
+(add-hook 'php-mode-hook 'emmet-mode)
+(add-hook 'emmet-mode-hook (lambda () (setq emmet-indentation 2)))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;  ac-emmet
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(add-to-list 'load-path "~/.emacs.d/lisp/ac-emmet")
+(require 'ac-emmet) 
+ (add-hook 'sgml-mode-hook 'ac-emmet-html-setup)
+(add-hook 'css-mode-hook 'ac-emmet-css-setup)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;  php-auto-yasnippets
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(add-to-list 'load-path "~/.emacs.d/lisp/php-auto-yasnippets")
+(require 'php-auto-yasnippets)
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;  web mode
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(add-to-list 'load-path "~/.emacs.d/lisp/web-mode")
-(require 'web-mode)
+(load-library "~/.emacs.d/lisp/web-mode/web-mode.el")
 
 (add-to-list 'auto-mode-alist '("\\.phtml\\'" . web-mode))
 (add-to-list 'auto-mode-alist '("\\.html\\'" . web-mode))
@@ -165,12 +320,7 @@ g           ,(format
 (add-to-list 'auto-mode-alist '("\\.mustache\\'" . web-mode))
 (add-to-list 'auto-mode-alist '("\\.djhtml\\'" . web-mode))
 (add-to-list 'auto-mode-alist '("\\.php\\'" . web-mode))
-(add-hook 'web-mode-hook 'linum-mode 1)
-(add-hook 'web-mode-hook 'autopair-mode)
 (add-hook 'web-mode-hook 'wrap-region-mode)
-(add-hook 'web-mode-hook 'linum-mode)
-(add-hook 'web-mode-hook 'yas-minor-mode)
-(add-hook 'web-mode-hook 'electric-pair-mode)
 
 (defun web-mode-init ()
   "web-mode config."
@@ -180,11 +330,52 @@ g           ,(format
   (setq web-mode-prefer-server-commenting t)
   (comment-auto-fill)
   (auto-complete-init)
+  (emmet-mode t)
+  (yas-minor-mode t)
+  (linum-mode t)
   )
 
-(add-to-list 'ac-modes 'web-mode)
+(add-hook 'web-mode-hook 'web-mode-init)
 
-; make php-mode indentation vaguely sane
+( add-hook 'web-mode-hook
+          '(lambda ()
+             (yas-minor-mode)
+	     (linum-mode)
+	     (electric-pair-mode)
+	     (emmet-mode)
+	     )	  
+	  )
+
+;; auto-complete sources for web-mode
+;; (setq web-mode-ac-sources-alist
+;;       '(("css" . (ac-source-css-property))
+;; 	("html" . (ac-source-words-in-buffer ac-source-abbrev)))
+;;       )
+
+(setq web-mode-ac-sources-alist
+      '(("css" . (ac-source-words-in-buffer ac-source-css-property))
+        ("html" . (ac-source-words-in-buffer ac-source-abbrev))
+        ("php" . (ac-source-words-in-buffer
+                  ac-source-words-in-same-mode-buffers
+                  ac-source-dictionary))))
+
+
+
+
+;; Here is a sample config for editing PHP templates,
+;;  using php-auto-yasnippets, emmet-mode, and ac-emmet:
+(add-hook 'web-mode-before-auto-complete-hooks
+          '(lambda ()
+             (let ((web-mode-cur-language
+                    (web-mode-language-at-pos)))
+               (if (string= web-mode-cur-language "php")
+                   (yas-activate-extra-mode 'php-mode)
+                 (yas-deactivate-extra-mode 'php-mode))
+               (if (string= web-mode-cur-language "css")
+                   (setq emmet-use-css-transform t)
+                 (setq emmet-use-css-transform nil)))))
+
+;; make php-mode indentation vaguely sane
 (add-hook 'php-mode-hook
           (lambda ()
             (setq indent-tabs-mode t)
@@ -192,6 +383,9 @@ g           ,(format
             (c-set-offset 'substatement-open 0)))
 
 (add-hook 'php-mode-hook 'auto-complete-mode 1)
+
+(setq web-mode-enable-current-element-highlight t)
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -224,22 +418,12 @@ g           ,(format
 (add-to-list 'auto-mode-alist '(".bowerrc" . js2-mode))
 (add-hook 'js2-mode-hook 'yas-minor-mode)
 
-;; js2 enhancements
-
-(require 'flymake-cursor)
-;; syntax checking
-(add-to-list 'load-path "~/.emacs.d/lisp/lintnode")
-(require 'flymake-jslint)
-;; Make sure we can find the lintnode executable
-(setq lintnode-location "~/.emacs.d/lisp/lintnode")
-;; JSLint can be... opinionated
-(setq lintnode-jslint-excludes (list 'nomen 'undef 'plusplus 'onevar 'white))
-;; Start the server when we first open a js file and start checking
+;; turn on lintnode
 (add-hook 'js-mode-hook
           (lambda ()
             (lintnode-hook)))
 
-; js repl
+                                        ; ;  js repl
 (require 'js-comint)
 ;; Use node as our repl
 (setq inferior-js-program-command "node")
@@ -252,6 +436,26 @@ g           ,(format
                      (lambda (output)
                        (replace-regexp-in-string ".*1G\.\.\..*5G" "..."
                                                  (replace-regexp-in-string ".*1G.*3G" "&gt;" output))))))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;  swank-js
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+
+(slime-setup '(slime-repl))
+
+(add-to-list 'load-path   "~/.emacs.d/lisp/haml-mode")
+(add-to-list 'load-path "~/.emacs.d/lisp/swank-js")
+(require 'slime-js)
+
+(global-set-key [f5] 'slime-js-reload)
+(add-hook 'js2-mode-hook
+          (lambda ()
+            (slime-js-minor-mode 1)))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -270,6 +474,19 @@ g           ,(format
 (add-hook 'sass-mode-hook 'linum-mode)
 (add-hook 'sass-mode-hook 'global-auto-revert-mode)
 (add-hook 'sass-mode-hook 'auto-complete-mode)
+(add-hook 'sass-mode-hook 'yas-minor-mode)
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;  less-css-mode
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; looks like we need haml-mode first
+(add-to-list 'load-path   "~/.emacs.d/lisp/less-css-mode")
+(require 'less-css-mode)
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -300,7 +517,6 @@ g           ,(format
 ;; while we are here...
 (add-hook 'css-mode-hook 'smartparens-mode)
 (add-hook 'css-mode-hook 'yas-minor-mode)
-
 
 
 
@@ -359,17 +575,28 @@ g           ,(format
   '(progn
      (define-key python-mode-map (kbd "C-c C-d") 'helm-pydoc)))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;  company mode
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; (add-to-list  'load-path  "~/.emacs.d/lisp/company-mode" )
+;; (require 'company)
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; 
+;;
 ;; ruby things
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;; Setting rbenv path
+(setenv "PATH" (concat (getenv "HOME") "/.rbenv/shims:" (getenv "HOME") "/.rbenv/bin:" (getenv "PATH")))
+(setq exec-path (cons (concat (getenv "HOME") "/.rbenv/shims") (cons (concat (getenv "HOME") "/.rbenv/bin") exec-path)))
 
 (add-to-list 'load-path "~/.emacs.d/lisp/rhtml")
 (require 'rhtml-mode)
-
 
 (add-to-list 'load-path "~/.emacs.d/lisp/inf-ruby")
 (autoload 'inf-ruby "inf-ruby" "Run an inferior Ruby process" t)
@@ -380,11 +607,18 @@ g           ,(format
 (global-set-key [S-f9] 'pry-intercept)
 (global-set-key [f9] 'pry-intercept-rerun)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; ruby mode for Gemfiles
+(setq auto-mode-alist (cons '("\\.rjs\\'" . ruby-mode) auto-mode-alist))
+;; Rakefiles are Ruby files:
+(setq auto-mode-alist (cons '("\\Rakefile\\'" . ruby-mode) auto-mode-alist))
+;; So is Gemfile:
+(setq auto-mode-alist (cons '("\\Gemfile\\'" . ruby-mode) auto-mode-alist))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
-;; jedi
+;;  jedi
 ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (add-to-list 'load-path "~/.emacs.d/lisp/emacs-ctable")
 (require 'ctable)
@@ -395,9 +629,13 @@ g           ,(format
 (add-to-list 'load-path "~/.emacs.d/lisp/emacs-epc")
 (require 'epc)
 
+(add-to-list 'load-path "~/.emacs.d/lisp/emacs-python-environment")
+(require 'python-environment)
+
 (add-to-list 'load-path "~/.emacs.d/lisp/emacs-jedi")
 (add-hook 'python-mode-hook 'jedi:setup)
 (require 'jedi)
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -445,35 +683,44 @@ g           ,(format
                      (and matching (char-syntax matching)))))))
 
 
-;; http://emacsblog.org/2007/01/17/indent-whole-buffer/
-(defun iwb ()
-  "indent whole buffer"
-  (interactive)
-  (delete-trailing-whitespace)
-  (indent-region (point-min) (point-max) nil)
-  (untabify (point-min) (point-max)))
-
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; 
+;;
 ;; skewer dep: simple-httpd
-;; 
+;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(add-to-list 'load-path "~/.emacs.d/lisp/emacs-web-server")
-(require 'simple-httpd)
-(setq httpd-root "~/www/")
- (httpd-start)
+;; (add-to-list 'load-path "~/.emacs.d/lisp/emacs-web-server")
+;; (require 'simple-httpd)
+
+;; (add-hook 'js2-mode-hook 'skewer-mode)
+;; (add-hook 'css-mode-hook 'skewer-css-mode)
+;; (add-hook 'web-mode-hook 'skewer-html-mode)
+;; (setq httpd-root "~/www/")
+;; (httpd-start)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; 
+;;
 ;;  skewer
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(add-to-list 'load-path "~/.emacs.d/lisp/skewer-mode")
-(require 'skewer-mode)
+;; (add-to-list 'load-path "~/.emacs.d/lisp/skewer-mode")
+;; (require 'skewer-mode)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;   mozrepl
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(require 'moz)
+
+(autoload 'moz-minor-mode "moz" "Mozilla Minor and Inferior Mozilla Modes" t)
+
+(add-hook 'javascript-mode-hook 'javascript-custom-setup)
+(defun javascript-custom-setup ()
+  (moz-minor-mode 1))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -503,23 +750,21 @@ g           ,(format
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; utf-8 always and forever
-;; (setq erc-server-coding-system '(utf-8 ))
+;;  utf-8 always and forever
+(setq erc-server-coding-system '(utf-8 ))
 
 (autoload 'erc-nick-notify-mode "erc-nick-notify"
   "Minor mode that calls `erc-nick-notify-cmd' when his nick gets
-mentioned in an erc channel" t)
+ mentioned in an erc channel" t)
 (eval-after-load 'erc '(erc-nick-notify-mode t))
-
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;  everything else
 ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-; customize mode-line
+                                        ; customize mode-line
 (set-face-foreground 'mode-line "white")
 (set-face-background 'mode-line "purple")
 
@@ -531,8 +776,10 @@ mentioned in an erc channel" t)
  ;; If there is more than one, they won't work right.
  '(auto-revert-check-vc-info t)
  '(custom-safe-themes (quote ("698f6c799733e1f051f41ba2f2e0a9487178834ceb495b3c21e06fb999699779" default)))
+ '(erc-server-coding-system (quote (utf-8 . utf-8)))
  '(inhibit-startup-screen t)
- '(jabber-account-list (quote (("") ("sunilw@chat.facebook.com" (:password . "***")))))
+ '(jabber-account-list (quote (("") ("sunilw@chat.facebook.com"))))
+ '(require-final-newline nil)
  '(tool-bar-mode nil))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
