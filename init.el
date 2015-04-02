@@ -35,6 +35,29 @@
 
 (require 'xt-mouse)
 
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;  nyannyanyanyan
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+(add-to-list 'load-path "~/.emacs.d/lisp/nyan-mode")
+(require 'nyan-mode)
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;  yaml mode
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(add-to-list 'load-path "~/.emacs.d/lisp/yaml-mode")
+(require 'yaml-mode)
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;  markdown mode
@@ -242,7 +265,6 @@
 (add-hook 'web-mode-hook 'yas-minor-mode)
 
 
-
 ;; ;;
 ;; ;;  angular snippets for yas
 ;; ;;
@@ -423,7 +445,7 @@
           (lambda ()
             (lintnode-hook)))
 
-                                        ; ;  js repl
+;; je-repl
 (require 'js-comint)
 ;; Use node as our repl
 (setq inferior-js-program-command "node")
@@ -443,7 +465,6 @@
 ;;  swank-js
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
 
 
 (slime-setup '(slime-repl))
@@ -569,11 +590,11 @@
 (eval-after-load "python"
   '(define-key inferior-python-mode-map "\t" 'python-shell-completion-complete-or-indent))
 
-(add-to-list 'load-path "~/.emacs.d/lisp/emacs-helm-pydoc")
-(require 'helm-pydoc)
-(eval-after-load "python"
-  '(progn
-     (define-key python-mode-map (kbd "C-c C-d") 'helm-pydoc)))
+;;(add-to-list 'load-path "~/.emacs.d/lisp/emacs-helm-pydoc")
+;;(require 'helm-pydoc)
+;; (eval-after-load "python"
+;;   '(progn
+;;      (define-key python-mode-map (kbd "C-c C-d") 'helm-pydoc)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -690,14 +711,14 @@
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; (add-to-list 'load-path "~/.emacs.d/lisp/emacs-web-server")
-;; (require 'simple-httpd)
+(add-to-list 'load-path "~/.emacs.d/lisp/emacs-web-server")
+(require 'simple-httpd)
 
-;; (add-hook 'js2-mode-hook 'skewer-mode)
-;; (add-hook 'css-mode-hook 'skewer-css-mode)
+(add-hook 'js2-mode-hook 'skewer-mode)
+(add-hook 'css-mode-hook 'skewer-css-mode)
 ;; (add-hook 'web-mode-hook 'skewer-html-mode)
-;; (setq httpd-root "~/www/")
-;; (httpd-start)
+(setq httpd-root "~/www/")
+(httpd-start)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -705,8 +726,10 @@
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; (add-to-list 'load-path "~/.emacs.d/lisp/skewer-mode")
-;; (require 'skewer-mode)
+(add-to-list 'load-path "~/.emacs.d/lisp/skewer-mode")
+(require 'skewer-mode)
+(require 'skewer-repl)
+(require 'skewer-html)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -758,6 +781,40 @@
  mentioned in an erc channel" t)
 (eval-after-load 'erc '(erc-nick-notify-mode t))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;  neotree
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; (add-to-list 'load-path "~/.emacs.d/lisp/emacs-neotree")
+; (require 'neotree)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;  tern
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(add-to-list 'load-path "~/opt/tern/emacs")
+(require 'tern)
+
+(eval-after-load 'tern
+   '(progn
+      (require 'tern-auto-complete)
+      (tern-ac-setup)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;  js3 mode
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+(add-to-list 'load-path "~/.emacs.d/lisp/js3-mode")
+(require 'js3-mode)
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;  everything else
@@ -775,7 +832,10 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(auto-revert-check-vc-info t)
- '(custom-safe-themes (quote ("698f6c799733e1f051f41ba2f2e0a9487178834ceb495b3c21e06fb999699779" default)))
+ '(browse-url-browser-function (quote browse-url-chromium))
+ '(custom-safe-themes
+   (quote
+    ("698f6c799733e1f051f41ba2f2e0a9487178834ceb495b3c21e06fb999699779" default)))
  '(erc-server-coding-system (quote (utf-8 . utf-8)))
  '(inhibit-startup-screen t)
  '(jabber-account-list (quote (("") ("sunilw@chat.facebook.com"))))
