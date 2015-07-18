@@ -85,6 +85,43 @@
 (setq inferior-lisp-program "/usr/bin/sbcl")
 
 
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;  js2-mode
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(add-to-list 'load-path "~/.emacs.d/lisp/js2-mode")
+(require 'js2-mode)
+
+(autoload 'js2-mode "js2-mode" nil t)
+(add-to-list 'auto-mode-alist '("\\.js$" . js2-mode))
+(add-to-list 'auto-mode-alist '(".bowerrc" . js2-mode))
+(add-hook 'js2-mode-hook 'yas-minor-mode)
+
+;; turn on lintnode
+(add-hook 'js-mode-hook
+          (lambda ()
+            (lintnode-hook)))
+
+;; je-repl
+(require 'js-comint)
+;; Use node as our repl
+(setq inferior-js-program-command "node")
+(setq inferior-js-mode-hook
+      (lambda ()
+        ;; We like nice colors
+        (ansi-color-for-comint-mode-on)
+        ;; Deal with some prompt nonsense
+        (add-to-list 'comint-preoutput-filter-functions
+                     (lambda (output)
+                       (replace-regexp-in-string ".*1G\.\.\..*5G" "..."
+                                                 (replace-regexp-in-string ".*1G.*3G" "&gt;" output))))))
+
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;  js-comint
@@ -130,14 +167,6 @@
 (add-hook 'php-mode-hook 'php-boris-minor-mode)
 (add-hook 'web-mode-hook 'php-boris-minor-mode)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  node repl
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;; node repl
-(require 'nodejs-repl)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -274,6 +303,18 @@
 ;; (require 'angular-snippets)
 ;; (eval-after-load "sgml-mode"
 ;;   '(define-key html-mode-map (kbd "C-c C-d") 'ng-snip-show-docs-at-point))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;  node repl
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; node repl
+(require 'nodejs-repl)
+
+(require 'nodejs-repl-eval)
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -426,38 +467,6 @@
 (require 'flymake-jslint)
 (add-hook 'js-mode-hook 'flymake-jslint-load)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  js2-mode
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(add-to-list 'load-path "~/.emacs.d/lisp/js2-mode")
-(require 'js2-mode)
-
-(autoload 'js2-mode "js2-mode" nil t)
-(add-to-list 'auto-mode-alist '("\\.js$" . js2-mode))
-(add-to-list 'auto-mode-alist '(".bowerrc" . js2-mode))
-(add-hook 'js2-mode-hook 'yas-minor-mode)
-
-;; turn on lintnode
-(add-hook 'js-mode-hook
-          (lambda ()
-            (lintnode-hook)))
-
-;; je-repl
-(require 'js-comint)
-;; Use node as our repl
-(setq inferior-js-program-command "node")
-(setq inferior-js-mode-hook
-      (lambda ()
-        ;; We like nice colors
-        (ansi-color-for-comint-mode-on)
-        ;; Deal with some prompt nonsense
-        (add-to-list 'comint-preoutput-filter-functions
-                     (lambda (output)
-                       (replace-regexp-in-string ".*1G\.\.\..*5G" "..."
-                                                 (replace-regexp-in-string ".*1G.*3G" "&gt;" output))))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -774,12 +783,12 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;  utf-8 always and forever
-(setq erc-server-coding-system '(utf-8 ))
+;; (setq erc-server-coding-system '(utf-8 ))
 
-(autoload 'erc-nick-notify-mode "erc-nick-notify"
-  "Minor mode that calls `erc-nick-notify-cmd' when his nick gets
- mentioned in an erc channel" t)
-(eval-after-load 'erc '(erc-nick-notify-mode t))
+;; (autoload 'erc-nick-notify-mode "erc-nick-notify"
+;;   "Minor mode that calls `erc-nick-notify-cmd' when his nick gets
+;;  mentioned in an erc channel" t)
+;; (eval-after-load 'erc '(erc-nick-notify-mode t))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
